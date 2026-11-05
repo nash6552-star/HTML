@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        
+        Sticky Notes App
+    
+    </title>
+
+    <style>
+
+        * {
+          
+            margin: 0;
+          
+            padding: 0;
+          
+            box-sizing: border-box;
+          
+            font-family: "Segoe UI", Arial, sans-serif;
+        
+        }
+
+        body {
+        
+            min-height: 100vh;
+        
+            background: #182536;
+        
+            color: white;
+        
+            overflow-x: hidden;
+        
+        }
+
+        /* Header */
+
+        header {
+        
+            background: #101c2b;
+        
+            padding: 20px 30px;
+        
+            display: flex;
+        
+            justify-content: space-between;
+        
+            align-items: center;
+        
+            flex-wrap: wrap;
+        
+            gap: 15px;
+        
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        
+        }
+
+        header h1 {
+        
+            font-size: 27px;
+        
+            color: #facc15;
+        
+        }
+
+        header p {
+        
+            color: #9caec2;
+        
+            font-size: 13px;
+        
+            margin-top: 4px;
+        
+        }
+
+        .add-btn {
+        
+            background: #facc15;
+        
+            color: #172033;
+        
+            border: none;
+        
+            padding: 12px 20px;
+        
+            border-radius: 8px;
+        
+            font-weight: bold;
+        
+            cursor: pointer;
+        
+            transition: 0.3s;
+        
+        }
+
+        .add-btn:hover {
+        
+            background: #eab308;
+        
+            transform: scale(1.05);
+        
+        }
+
+        /* Toolbar */
+
+        .toolbar {
+        
+            background: #203249;
+        
+            padding: 15px 25px;
+        
+            display: flex;
+        
+            align-items: center;
+        
+            gap: 12px;
+        
+            flex-wrap: wrap;
+        
+        }
+
+        .toolbar span {
+        
+            color: #cbd5e1;
+        
+            font-size: 14px;
+        
+        }
+
+        .color {
+        
+            width: 25px;
+        
+            height: 25px;
+        
+            border-radius: 50%;
+        
+            cursor: pointer;
+        
+            border: 2px solid white;
+        
+            transition: 0.2s;
+        
+        }
+
+        .color:hover {
+        
+            transform: scale(1.2);
+        
+        }
+
+        .yellow { background: #fff176; }
+        
+        .pink { background: #ff9eb5; }
+        
+        .blue { background: #90caf9; }
+        
+        .green { background: #a5d6a7; }
+        
+        .purple { background: #ce93d8; }
+        
+        .orange { background: #ffcc80; }
+
+        /* Workspace */
+
+        #workspace {
+        
+            min-height: calc(100vh - 150px);
+        
+            padding: 30px;
+        
+            display: flex;
+        
+            flex-wrap: wrap;
+        
+            align-content: flex-start;
+        
+            align-items: flex-start;
+        
+            gap: 25px;
+        
+            background-color: #26384d;
+        
+            background-image:
+        
+                radial-gradient(#52647a 1px, transparent 1px);
+            
+            background-size: 25px 25px;
+        }
+
+        /* Sticky Note */
+
+        .note {
+            
+            position: relative;
+            
+            width: 220px;
+            
+            min-width: 180px;
+            
+            min-height: 210px;
+            
+            height: 220px;
+            
+            padding: 15px;
+            
+            color: #333;
+            
+            border-radius: 2px;
+            
+            box-shadow: 5px 8px 15px rgba(0,0,0,0.3);
+            
+            display: flex;
+            
+            flex-direction: column;
+            
+            transform: rotate(-1deg);
+            
+            transition: box-shadow 0.2s;
+            
+            resize: both;
+            
+            overflow: auto;
+        
+        }
+
+        .note:nth-child(even) {
+        
+            transform: rotate(1.5deg);
+        
+        }
+
+        .note:hover {
+        
+            box-shadow: 8px 12px 20px rgba(0,0,0,0.45);
+        
+            z-index: 5;
+        
+        }
+
+        .note.yellow { background: #fff176; }
+        
+        .note.pink { background: #ff9eb5; }
+        
+        .note.blue { background: #90caf9; }
+        
+        .note.green { background: #a5d6a7; }
+        
+        .note.purple { background: #ce93d8; }
+        
+        .note.orange { background: #ffcc80; }
+
+        /* Note Header */
+
+        .note-header {
+        
+            display: flex;
+        
+            justify-content: space-between;
+        
+            align-items: center;
+        
+            padding-bottom: 10px;
+        
+            border-bottom: 1px solid rgba(0,0,0,0.15);
+        
+            cursor: grab;
+        
+            user-select: none;
+        
+        }
+
+        .note-header:active {
+        
+            cursor: grabbing;
+        
+        }
+
+        .note-title {
+        
+            font-weight: bold;
+            
+            font-size: 14px;
+        
+        }
+
+        .note-actions {
+        
+            display: flex;
+        
+            gap: 5px;
+        
+        }
+
+        .note-actions button {
+        
+            border: none;
+        
+            background: rgba(0,0,0,0.1);
+        
+            padding: 4px 7px;
+        
+            border-radius: 4px;
+        
+            cursor: pointer;
+        
+            color: #333;
+        
+        }
+
+        .note-actions button:hover {
+        
+            background: rgba(0,0,0,0.25);
+        
+        }
+
+        /* Note Content */
+
+        .note-content {
+        
+            flex: 1;
+        
+            width: 100%;
+        
+            background: transparent;
+        
+            border: none;
+        
+            outline: none;
+        
+            resize: none;
+        
+            margin-top: 12px;
+        
+            color: #333;
+        
+            font-size: 15px;
+        
+            line-height: 1.5;
+        
+        }
+
+        .note-content::placeholder {
+        
+            color: rgba(0,0,0,0.45);
+        
+        }
+
+        /* Date */
+
+        .note-date {
+        
+            font-size: 10px;
+        
+            color: rgba(0,0,0,0.55);
+        
+            text-align: right;
+        
+            margin-top: 8px;
+        
+        }
+
+        /* Empty Message */
+
+        .empty-message {
+        
+            width: 100%;
+        
+            text-align: center;
+        
+            color: #a9b9cc;
+        
+            margin-top: 100px;
+        
+        }
+
+        .empty-message h2 {
+        
+            font-size: 25px;
+        
+            margin-bottom: 10px;
+        
+        }
+
+        /* Footer */
+
+        footer {
+        
+            text-align: center;
+        
+            padding: 15px;
+        
+            color: #91a4b9;
+        
+            font-size: 12px;
+        
+            background: #101c2b;
+        
+        }
+
+        @media(max-width: 600px) {
+
+            header {
+        
+                padding: 18px;
+        
+            }
+
+            header h1 {
+        
+                font-size: 22px;
+        
+            }
+
+            #workspace {
+        
+                justify-content: center;
+        
+                padding: 20px;
+        
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Header -->
+
+    <header>
+
+        <div>
+        
+            <h1>
+                
+                📌 My Sticky Notes
+            
+            </h1>
+            
+            <p>
+                
+                Your personal digital reminder wall
+            
+            </p>
+
+        </div>
+
+        <button class="add-btn" onclick="createNote()">
+            
+            + Create Note
+
+        </button>
+
+    </header>
+
+    <!-- Colour Toolbar -->
+
+    <div class="toolbar">
+
+        <span>
+            
+            Choose note colour:
+        
+        </span>
+
+        <button class="color yellow"
+            onclick="setSelectedColor('yellow')"
+            aria-label="Yellow">
+        
+        </button>
+
+        <button class="color pink"
+            onclick="setSelectedColor('pink')"
+            aria-label="Pink">
+        
+        </button>
+
+        <button class="color blue"
+            onclick="setSelectedColor('blue')"
+            aria-label="Blue">
+        
+        </button>
+
+        <button class="color green"
+            onclick="setSelectedColor('green')"
+            aria-label="Green">
+        
+        </button>
+
+        <button class="color purple"
+            onclick="setSelectedColor('purple')"
+            aria-label="Purple">
+        
+        </button>
+
+        <button class="color orange"
+            onclick="setSelectedColor('orange')"
+            aria-label="Orange">
+        
+        </button>
+
+        <span id="noteCount">
+            
+            0 Notes
+        
+        </span>
+
+    </div>
+
+
+    <!-- Workspace -->
+
+    <main id="workspace">
+
+        <div class="empty-message" id="emptyMessage">
+           
+            <h2>
+                
+                Your wall is empty!
+            
+            </h2>
+            
+            <p>
+                
+                Click Create Note to add your first reminder.
+            
+            </p>
+
+        </div>
+
+    </main>
+
+
+    <footer>
+        
+        Sticky Notes App | Your reminders, always in sight.
+    
+    </footer>
+
+
+    <script>
+
+        // Selected colour
+
+        let selectedColor = "yellow";
+
+        // Notes storage
+
+        let notes = JSON.parse(localStorage.getItem("stickyNotes")) || [];
+
+        // Set selected colour
+
+        function setSelectedColor(color) {
+
+            selectedColor = color;
+
+        }
+
+
+        // Save notes to Local Storage
+
+        function saveNotes() {
+
+            localStorage.setItem(
+                "stickyNotes",
+                JSON.stringify(notes)
+           
+            );
+
+        }
+
+        // Create a new note
+
+        function createNote() {
+
+            const note = {
+
+                id: Date.now() + Math.random(),
+
+                title: "My Note",
+
+                content: "",
+
+                color: selectedColor,
+
+                date: new Date().toLocaleString(),
+
+                x: null,
+
+                y: null,
+
+                width: 220,
+
+                height: 220,
+
+                zIndex: notes.length + 1
+
+            };
+
+            notes.push(note);
+
+            saveNotes();
+
+            renderNotes();
+
+        }
+
+
+        // Render all notes
+
+        function renderNotes() {
+
+            const workspace = document.getElementById("workspace");
+
+            workspace.querySelectorAll(".note").forEach(
+                note => note.remove()
+            );
+
+            const emptyMessage = document.getElementById("emptyMessage");
+
+            emptyMessage.style.display =
+                notes.length === 0 ? "block" : "none";
+
+            notes.forEach(note => {
+
+                const noteElement = document.createElement("div");
+
+                noteElement.className = "note " + note.color;
+
+                noteElement.dataset.id = note.id;
+
+                noteElement.style.width = note.width + "px";
+                noteElement.style.height = note.height + "px";
+
+                noteElement.style.zIndex = note.zIndex;
+
+                if (note.x !== null && note.y !== null) {
+
+                    noteElement.style.position = "absolute";
+
+                    noteElement.style.left = note.x + "px";
+
+                    noteElement.style.top = note.y + "px";
+
+                }
+
+                // Note Header
+
+                const header = document.createElement("div");
+
+                header.className = "note-header";
+
+                const title = document.createElement("span");
+
+                title.className = "note-title";
+
+                title.textContent = note.title;
+
+                const actions = document.createElement("div");
+
+                actions.className = "note-actions";
+
+                // Colour button
+
+                const colorBtn = document.createElement("button");
+
+                colorBtn.textContent = "🎨";
+
+                colorBtn.title = "Change colour";
+
+                colorBtn.onclick = () => changeColor(note.id);
+
+                // Delete button
+
+                const deleteBtn = document.createElement("button");
+
+                deleteBtn.textContent = "✖";
+
+                deleteBtn.title = "Delete note";
+
+                deleteBtn.onclick = () => deleteNote(note.id);
+
+                actions.appendChild(colorBtn);
+
+                actions.appendChild(deleteBtn);
+
+                header.appendChild(title);
+
+                header.appendChild(actions);
+
+
+                // Editable Content
+
+                const content = document.createElement("textarea");
+
+                content.className = "note-content";
+
+                content.placeholder = "Write your reminder here...";
+
+                content.value = note.content;
+
+                content.addEventListener("input", function() {
+
+                    note.content = content.value;
+
+                    saveNotes();
+
+                });
+
+
+                // Date
+
+                const date = document.createElement("div");
+
+                date.className = "note-date";
+
+                date.textContent = note.date;
+
+
+                // Add elements
+
+                noteElement.appendChild(header);
+
+                noteElement.appendChild(content);
+
+                noteElement.appendChild(date);
+
+                workspace.appendChild(noteElement);
+
+
+                // Drag functionality
+
+                makeDraggable(noteElement, header, note);
+
+                // Resize functionality
+
+                const resizeObserver = new ResizeObserver(() => {
+
+                    note.width = noteElement.offsetWidth;
+
+                    note.height = noteElement.offsetHeight;
+
+                    saveNotes();
+
+                });
+
+                resizeObserver.observe(noteElement);
+
+                // Bring note to front when clicked
+
+                noteElement.addEventListener("pointerdown", () => {
+
+                    note.zIndex = Math.max(
+                        0,
+                        ...notes.map(n => n.zIndex || 0)
+                    ) + 1;
+
+                    noteElement.style.zIndex = note.zIndex;
+
+                    saveNotes();
+
+                }, { once: false });
+
+            });
+
+            document.getElementById("noteCount").textContent =
+                notes.length + (notes.length === 1 ? " Note" : " Notes");
+
+        }
+
+
+        // Drag notes
+
+        function makeDraggable(element, handle, note) {
+
+            let startX, startY, initialX, initialY;
+
+            handle.addEventListener("pointerdown", function(event) {
+
+                if (event.target.closest("button")) return;
+
+                event.preventDefault();
+
+                element.setPointerCapture(event.pointerId);
+
+                const rect = element.getBoundingClientRect();
+
+                startX = event.clientX;
+
+                startY = event.clientY;
+
+                initialX = rect.left;
+
+                initialY = rect.top;
+
+                // Switch to absolute positioning
+
+                element.style.position = "absolute";
+
+                element.style.left = initialX + window.scrollX + "px";
+
+                element.style.top = initialY + window.scrollY + "px";
+
+                function move(event) {
+
+                    const newX = initialX + event.clientX - startX;
+
+                    const newY = initialY + event.clientY - startY;
+
+                    element.style.left = newX + window.scrollX + "px";
+
+                    element.style.top = newY + window.scrollY + "px";
+
+                    note.x = newX + window.scrollX;
+
+                    note.y = newY + window.scrollY;
+
+                }
+
+                function stop() {
+
+                    saveNotes();
+
+                    element.removeEventListener("pointermove", move);
+
+                    element.removeEventListener("pointerup", stop);
+
+                    element.removeEventListener("pointercancel", stop);
+
+                }
+
+                element.addEventListener("pointermove", move);
+
+                element.addEventListener("pointerup", stop);
+
+                element.addEventListener("pointercancel", stop);
+
+            });
+
+        }
+
+        // Change note colour
+
+        function changeColor(id) {
+
+            const colors = [
+                "yellow",
+                "pink",
+                "blue",
+                "green",
+                "purple",
+                "orange"
+
+            ];
+
+            const note = notes.find(n => n.id === id);
+
+            let currentIndex = colors.indexOf(note.color);
+
+            note.color = colors[
+                
+                (currentIndex + 1) % colors.length
+            
+            ];
+
+            saveNotes();
+
+            renderNotes();
+
+        }
+
+        // Delete a note
+
+        function deleteNote(id) {
+
+            if (!confirm("Are you sure you want to delete this note?")) {
+
+                return;
+
+            }
+
+            notes = notes.filter(note => note.id !== id);
+
+            saveNotes();
+
+            renderNotes();
+
+        }
+
+        // Load saved notes
+
+        renderNotes();
+
+    </script>
+
+</body>
+
+</html>
